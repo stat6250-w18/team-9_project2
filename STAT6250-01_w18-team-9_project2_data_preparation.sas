@@ -48,9 +48,9 @@ SC-Listing-Dec2017.xlsx
 [Unique ID Schema] The column OSHPD_ID is the unique id.
 --
 
-[Dataset 3 Name] SC_data
+[Dataset 3 Name] SC_data15
 
-[Dataset Description] Specialty Care Clinics Annual Utilization Data
+[Dataset Description] Specialty Care Clinics Annual Utilization Data in 2016
 
 [Experimental Unit Description] California Specialty Care Clinics Annual 
 Utilization Data(Complete Data Set).
@@ -61,12 +61,35 @@ Utilization Data(Complete Data Set).
 
 [Data Source]  The file https://www.oshpd.ca.gov/documents/HID/Utilization/
 SpCl16_util_data_FINAL.xlsx was downloaded and edited to produce file 
-SC_data.xlsx by deleting the column 34 to the end, fixing the column name 
+SC_data16.xlsx by deleting the column 34 to the end, fixing the column name 
 which make it more clear and creating the variable description for the 
 data set.
 
 [Data Dictionary] https://www.oshpd.ca.gov/documents/HID/Utilization/
 SpCl16_util_data_FINAL.xlsx
+
+[Unique ID Schema] The column OSHPD_ID is the unique id.
+--
+
+[Dataset 4 Name] SC_data15
+
+[Dataset Description] Specialty Care Clinics Annual Utilization Data in 2015
+
+[Experimental Unit Description] California Specialty Care Clinics Annual 
+Utilization Data(Complete Data Set).
+
+[Number of Observations] 617
+
+[Number of Features] 33
+
+[Data Source]  The file https://www.oshpd.ca.gov/documents/HID/Utilization/
+SpCl15_util_data_FINAL.xlsx was downloaded and edited to produce file 
+SC_data15.xlsx by deleting the column 34 to the end, fixing the column name 
+which make it more clear and creating the variable description for the 
+data set.
+
+[Data Dictionary] https://www.oshpd.ca.gov/documents/HID/Utilization/
+SpCl15_util_data_FINAL.xlsx
 
 [Unique ID Schema] The column OSHPD_ID is the unique id.
 ;
@@ -87,12 +110,16 @@ https://github.com/stat6250/team-9_project2/blob/master/data/SC_listing.xlsx?raw
 %let inputDataset2DSN = SC_listing_raw;
 
 %let inputDataset3URL =
-https://github.com/stat6250/team-9_project2/blob/master/data/SC_data.xlsx?raw=true
+https://github.com/stat6250/team-9_project2/blob/master/data/SC_data16.xlsx?raw=true
 ;
 %let inputDataset3Type = XLSX;
-%let inputDataset3DSN = SC_data_raw;
+%let inputDataset3DSN = SC_data16_raw;
 
-
+%let inputDataset4URL =
+https://github.com/stat6250/team-9_project2/blob/master/data/SC_data15.xlsx?raw=true
+;
+%let inputDataset4Type = XLSX;
+%let inputDataset4DSN = SC_data15_raw;
 
 
 * load raw datasets over the wire, if they doesn't already exist;
@@ -139,9 +166,15 @@ https://github.com/stat6250/team-9_project2/blob/master/data/SC_data.xlsx?raw=tr
     &inputDataset3URL.,
     &inputDataset3Type.
 )
+%loadDataIfNotAlreadyAvailable(
+    &inputDataset4DSN.,
+    &inputDataset4URL.,
+    &inputDataset4Type.
+)
 
 * sort and check raw datasets for duplicates with respect to their unique ids,
   removing blank rows, if needed;
+
 proc sort
         nodupkey
         data=HL_listing_raw
@@ -164,14 +197,25 @@ proc sort
 run;
 proc sort
         nodupkey
-        data=SC_data_raw
-        dupout=SC_data_raw_dups
-        out=SC_data_raw_sorted
+        data=SC_data16_raw
+        dupout=SC_data16_raw_dups
+        out=SC_data16_raw_sorted
     ;
     by
         OSHPD_ID
     ;
 run;
+proc sort
+        nodupkey
+        data=SC_data15_raw
+        dupout=SC_data15_raw_dups
+        out=SC_data15_raw_sorted
+    ;
+    by
+        OSHPD_ID
+    ;
+run;
+
 
 * combine HL_listing data and SC_listing data vertically
 ;
@@ -181,23 +225,25 @@ data HL_SC_Analytic_file;
         HL_listing_raw_sorted(in=HL_row)
         SC_listing_raw_sorted(in=SC_row)
     ;
-		retain
-			FACILITY_NAME
-			LICENSE_NUM
-			FACILITY_LEVEL
-			ADDRESS
-			CITY
-			ZIP_CODE
-			COUNTY_CODE
-			COUNTY_NAME
-			ER_SERVICE
-			TOTAL_BEDS
-			FACILITY_STATUS_DESC
-			FACILITY_STATUS_DATE
-			LICENSE_TYPE
-			LICENSE_CATEGORY
-		By
-			OSHPD_ID
+	retain
+		FACILITY_NAME
+		LICENSE_NUM
+		FACILITY_LEVEL
+		ADDRESS
+		CITY
+		ZIP_CODE
+		COUNTY_CODE
+		COUNTY_NAME
+		ER_SERVICE
+		TOTAL_BEDS
+		FACILITY_STATUS_DESC
+		FACILITY_STATUS_DATE
+		LICENSE_TYPE
+		LICENSE_CATEGORY
+	;
+	by
+		OSHPD_ID
+	;
     if
         HL_row=1
     then
@@ -209,8 +255,11 @@ data HL_SC_Analytic_file;
             data_source=SC_listing_raw_sorted;
         end;
 run;
+
+
 * build analytic dataset from raw datasets with the least number of columns
 ;
+
 data SC_data_analytic_file;
     retain
 		OSHPD_ID
@@ -304,9 +353,30 @@ data SC_data_analytic_file;
     ;
     merge
         HL_SC_Analytic_file
-      	SC_data 
+      	SC_data16 
     ;
     by
         OSHPD_ID
 	;
+run;
+
+
+* combine SC_data15_raw and SC_data16_raw vertically - TT
+;
+
+data SC_data_analytic_file_v2;
+    set
+        SC_data15_raw(in=ay2015_data_row)
+        SC_data16_raw(in=ay2016_data_row)
+    ;
+    if
+        ay2015_data_row=1
+    then
+        do;
+            data_source="15";
+        end;
+    else
+        do;
+            data_source="16";
+        end;
 run;
