@@ -69,80 +69,6 @@ any possible illegal values, and better handle missing data, e.g., by using
 a previous year's data or a rolling average of previous years' data as a proxy.
 ;
 
-proc sql;
-    create table SC15_analytic_file as
-        select 
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            GRO_REV_TOTL,
-            REV_OPER_TOTL,
-            EXP_OPER_TOTL,
-            NET_FRM_OPER
-        from
-            SC_data15_raw_sorted
-        ;
-quit;
-
-proc sql;
-    create table SC16_analytic_file as
-        select 
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            GRO_REV_TOTL,
-            REV_OPER_TOTL,
-            EXP_OPER_TOTL,
-            NET_FRM_OPER
-        from
-            SC_data16_raw_sorted
-        ;
-quit;
-
-data SC_analytic_file_TT1;
-    retain
-        OSHPD_ID
-        FAC_NAME
-        FAC_CITY
-        REV_OPER_TOTL
-        EXP_OPER_TOTL
-        NET_FRM_OPER
-        PROFIT_DIFFERENCES_1516
-    ;
-    keep
-        OSHPD_ID
-        FAC_NAME
-        FAC_CITY
-        NET_FRM_OPER
-        PROFIT_DIFFERENCES_1516
-    ;
-    merge
-        SC15_analytic_file(rename=(NET_FRM_OPER=PROFIT15))
-        SC16_analytic_file(rename=(NET_FRM_OPER=PROFIT16))
-    ;
-    by
-        OSHPD_ID
-    ;
-    PROFIT_DIFFERENCES_1516=
-        input(PROFIT16,best12.)
-        -
-        input(PROFIT15,best12.)
-    ;
-run;
-
-proc sql;
-    create table SC_analytic_file_TT1_print AS
-        select
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            PROFIT_DIFFERENCES_1516
-        from 
-            SC_analytic_file_TT1
-        order by
-            PROFIT_DIFFERENCES_1516 ascending;
-quit;
-
 *
 List all clinics experienced decrease (negative profit) from 15-16
 ;
@@ -219,35 +145,6 @@ any possible illegal values, and better handle missing data, e.g., by using
 a previous year's data or a rolling average of previous years' data as a proxy.
 ;
 
-data SC_analytic_file_TT2;
-    retain
-        OSHPD_ID
-        FAC_NAME
-        FAC_CITY
-        GRO_REV_TOTL
-        Gross_Patient_Revenue_Diff_1516
-    ;
-    keep
-        OSHPD_ID
-        FAC_NAME
-        FAC_CITY
-        GRO_REV_TOTL
-        Gross_Patient_Revenue_Diff_1516 
-    ;
-    merge
-        SC15_analytic_file(rename=(GRO_REV_TOTL=REVENUE15))
-        SC16_analytic_file(rename=(GRO_REV_TOTL=REVENUE16))
-    ;
-    by
-        OSHPD_ID
-    ;
-    Gross_Patient_Revenue_Diff_1516=
-        input(REVENUE16,best12.)
-        -
-        input(REVENUE15,best12.)
-    ;
-run;
-
 proc sql;
     create table SC_analytic_file_TT2_print AS
         select
@@ -258,9 +155,9 @@ proc sql;
         from 
             SC_analytic_file_TT2
         order by
-            Gross_Patient_Revenue_Diff_1516 descending;
+            Gross_Patient_Revenue_Diff_1516 descending
+	;
 quit;
-
 
 *
 List top 10 clinics experience increase in profit from 15-16
@@ -331,28 +228,13 @@ proc univariate
     histogram GRO_REV_TOTL;
 run;
 
-proc format;
-    value GRO_REV_TOTL_bins
-        low-<6662674="Q1 GRO_REV_TOTL"
-        6662674-<40383657="Q2 GRO_REV_TOTL"
-        40383657-<97329204="Q3 GRO_REV_TOTL"
-        97329204-high="Q4 GRO_REV_TOTL"
-    ;
-    value NET_FRM_OPER_bins
-        low-100170="Q1 NET_FRM_OPER"
-        100170-<690879="Q2 NET_FRM_OPER"
-        690879-<1369635="Q3 NET_FRM_OPER"
-        1369635-high="Q4 NET_FRM_OPER"
-    ;
-run;
-
 proc freq
-        data=SC16_analytic_file
+	data=SC16_analytic_file
     ;
     table
-             GRO_REV_TOTL
-            *NET_FRM_OPER
-            / missing norow nocol nopercent
+		GRO_REV_TOTL
+		*NET_FRM_OPER
+		/ missing norow nocol nopercent
     ;
     title
         'Patient Revenue vs. Profit'
@@ -370,9 +252,10 @@ proc freq
     ;
 run;
 
-proc corr data = SC16_analytic_file;
-var GRO_REV_TOTL;
-with NET_FRM_OPER;
+proc corr 
+	data = SC16_analytic_file;
+	var GRO_REV_TOTL;
+	with NET_FRM_OPER;
 run; 
 
 title;
