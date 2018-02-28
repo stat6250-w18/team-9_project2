@@ -98,8 +98,7 @@ SpCl15_util_data_FINAL.xlsx
 
 *create ouput format
 Use proc format to create formats that bin both columns with respect to the 
-output for Research Question 2 - TT
-;
+output for Research Question 2 - TT;
 proc format;
     value GRO_REV_TOTL_bins
         low-<6662674="Q1 GRO_REV_TOTL"
@@ -237,8 +236,7 @@ proc sort
 run;
 
 
-* combine HL_listing data and SC_listing data vertically
-;
+* combine HL_listing data and SC_listing data vertically;
 
 data HL_SC_Analytic_file;
     set
@@ -277,8 +275,7 @@ data HL_SC_Analytic_file;
 run;
 
 
-* build analytic dataset from raw datasets with the least number of columns
-;
+* build analytic dataset from raw datasets with the least number of columns;
 
 data SC_data_analytic_file;
     retain
@@ -381,8 +378,7 @@ data SC_data_analytic_file;
 run;
 
 
-* create SC15_analytic_file and SC16_analytic_file for further analysis - TT
-;
+* create SC15_analytic_file and SC16_analytic_file for further analysis - TT;
 
 proc sql;
     create table SC15_analytic_file as
@@ -429,8 +425,8 @@ proc sql;
 quit;
 
 * combine SC15_analytic_file and SC16_analytic_file,
-and compute PROFIT_DIFFERENCES_1516
-;
+and compute PROFIT_DIFFERENCES_1516;
+
 data SC_analytic_file_TT1;
     retain
         OSHPD_ID
@@ -463,8 +459,8 @@ data SC_analytic_file_TT1;
 run;
 
 * combine SC15_analytic_file and SC16_analytic_file, 
-and compute Gross_Patient_Revenue_Diff_1516
-;
+and compute Gross_Patient_Revenue_Diff_1516;
+
 data SC_analytic_file_TT2;
     retain
         OSHPD_ID
