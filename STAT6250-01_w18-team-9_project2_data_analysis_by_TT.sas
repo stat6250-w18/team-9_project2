@@ -374,7 +374,6 @@ proc corr data = SC16_analytic_file;
 var GRO_REV_TOTL;
 with NET_FRM_OPER;
 run; 
-ods graphics on;
 
 title;
 footnote;
