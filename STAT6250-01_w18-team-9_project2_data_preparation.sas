@@ -96,6 +96,26 @@ SpCl15_util_data_FINAL.xlsx
 
 * environmental setup;
 
+*create ouput format
+Use proc format to create formats that bin both columns with respect to the 
+output for Research Question 2 - TT
+;
+proc format;
+    value GRO_REV_TOTL_bins
+        low-<6662674="Q1 GRO_REV_TOTL"
+        6662674-<40383657="Q2 GRO_REV_TOTL"
+        40383657-<97329204="Q3 GRO_REV_TOTL"
+        97329204-high="Q4 GRO_REV_TOTL"
+    ;
+    value NET_FRM_OPER_bins
+        low-100170="Q1 NET_FRM_OPER"
+        100170-<690879="Q2 NET_FRM_OPER"
+        690879-<1369635="Q3 NET_FRM_OPER"
+        1369635-high="Q4 NET_FRM_OPER"
+    ;
+run;
+
+
 * setup environmental parameters;
 %let inputDataset1URL =
 https://github.com/stat6250/team-9_project2/blob/master/data/HL_listing.xlsx?raw=true
@@ -353,7 +373,7 @@ data SC_data_analytic_file;
     ;
     merge
         HL_SC_Analytic_file
-      	SC_data16 
+      	SC_data16_raw_sorted 
     ;
     by
         OSHPD_ID
@@ -361,22 +381,115 @@ data SC_data_analytic_file;
 run;
 
 
-* combine SC_data15_raw and SC_data16_raw vertically - TT
+* create SC15_analytic_file and SC16_analytic_file for further analysis - TT
 ;
 
-data SC_data_analytic_file_v2;
-    set
-        SC_data15_raw(in=ay2015_data_row)
-        SC_data16_raw(in=ay2016_data_row)
+proc sql;
+    create table SC15_analytic_file as
+        select 
+            OSHPD_ID,
+            FAC_NAME,
+            FAC_CITY,
+            GRO_REV_TOTL,
+            REV_OPER_TOTL,
+            EXP_OPER_TOTL,
+            NET_FRM_OPER
+        from
+            SC_data15_raw_sorted
+	;
+quit;
+
+proc sql;
+    create table SC16_analytic_file as
+        select 
+            OSHPD_ID,
+            FAC_NAME,
+            FAC_CITY,
+            GRO_REV_TOTL,
+            REV_OPER_TOTL,
+            EXP_OPER_TOTL,
+            NET_FRM_OPER
+        from
+            SC_data16_raw_sorted
+	;
+quit;
+
+proc sql;
+    create table SC_analytic_file_TT1_print AS
+        select
+            OSHPD_ID,
+            FAC_NAME,
+            FAC_CITY,
+            PROFIT_DIFFERENCES_1516
+        from 
+            SC_analytic_file_TT1
+        order by
+            PROFIT_DIFFERENCES_1516 ascending
+	;
+quit;
+
+* combine SC15_analytic_file and SC16_analytic_file,
+and compute PROFIT_DIFFERENCES_1516
+;
+data SC_analytic_file_TT1;
+    retain
+        OSHPD_ID
+        FAC_NAME
+        FAC_CITY
+        REV_OPER_TOTL
+        EXP_OPER_TOTL
+        NET_FRM_OPER
+        PROFIT_DIFFERENCES_1516
     ;
-    if
-        ay2015_data_row=1
-    then
-        do;
-            data_source="15";
-        end;
-    else
-        do;
-            data_source="16";
-        end;
+    keep
+        OSHPD_ID
+        FAC_NAME
+        FAC_CITY
+        NET_FRM_OPER
+        PROFIT_DIFFERENCES_1516
+    ;
+    merge
+        SC15_analytic_file(rename=(NET_FRM_OPER=PROFIT15))
+        SC16_analytic_file(rename=(NET_FRM_OPER=PROFIT16))
+    ;
+    by
+        OSHPD_ID
+    ;
+    PROFIT_DIFFERENCES_1516=
+        input(PROFIT16,best12.)
+        -
+        input(PROFIT15,best12.)
+    ;
+run;
+
+* combine SC15_analytic_file and SC16_analytic_file, 
+and compute Gross_Patient_Revenue_Diff_1516
+;
+data SC_analytic_file_TT2;
+    retain
+        OSHPD_ID
+        FAC_NAME
+        FAC_CITY
+        GRO_REV_TOTL
+        Gross_Patient_Revenue_Diff_1516
+    ;
+    keep
+        OSHPD_ID
+        FAC_NAME
+        FAC_CITY
+        GRO_REV_TOTL
+        Gross_Patient_Revenue_Diff_1516 
+    ;
+    merge
+        SC15_analytic_file(rename=(GRO_REV_TOTL=REVENUE15))
+        SC16_analytic_file(rename=(GRO_REV_TOTL=REVENUE16))
+    ;
+    by
+        OSHPD_ID
+    ;
+    Gross_Patient_Revenue_Diff_1516=
+        input(REVENUE16,best12.)
+        -
+        input(REVENUE15,best12.)
+    ;
 run;
