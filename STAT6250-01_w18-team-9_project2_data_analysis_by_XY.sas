@@ -15,7 +15,8 @@ See included file for dataset properties
 * environmental setup;
 
 * set relative file import path to current directory (using standard SAS trick);
-X "cd ""%substr(%sysget(SAS_EXECFILEPATH),1,%eval(%length(%sysget(SAS_EXECFILEPATH))-%length(%sysget(SAS_EXECFILENAME))))""";
+X "cd ""%substr(%sysget(SAS_EXECFILEPATH),1,%eval(%length(%sysget(SAS_EXECFILEPATH))
+-%length(%sysget(SAS_EXECFILENAME))))""";
 
 
 * load external file that generates analytic datasets SC_data_analytic_file,
@@ -33,9 +34,11 @@ title2
 'Rationale: This should identify counties that have most healthcare facilities in California.'
 ;
 footnote1
+'From the ten counties of most special care facilities and hospital numbers, we can see top five counties are all in south California.'
 ;
 
 footnote2
+'
 ;
 footnote3
 ;
@@ -70,11 +73,23 @@ footnote;
 
 
 title1
-'Research question: Can gross patient revenue (SC_16) be used to predict total operating revenue for special care facilities in 2016?'
+'Research question: Can net patient revenue (SC_16) be used to gross total revenue for special care facilities in 2016?'
 ;
 
 title2
-'Rationale: This should help us understand if the amount of public/private grants the specialty care facilities are receiving depends on the revenue from patients.'
+'Rationale: This should help us understand if the amount of public/private grants from patient service of the specialty care facilities will determine the gross revenue of the facility.'
+;
+
+footnote1
+"As shown in the two way table, there was an extremely high correlation between gross total revenue and net patient revenue, that facilities with higher net patient grants tend to have higher gross revenue(including operation revenue)."
+;
+
+footnote2
+"Possible explanations for this correlation include hospitals with larger operation size tend to receive more patient amount, and more credibility in reputation, so grants from public and organizations will be higher."
+;
+
+footnote3
+"Given this apparent correlation based on descriptive methodology, further investigation should be performed using inferential methodology to determine the level of statistical significance of the result."
 ;
 
 *
@@ -112,6 +127,7 @@ title1
 title2
 'Rationale: This helps identify the counties with significant revenue in healthcare industry. Will be a strong indicator for healthcare tech companies to focus on potential markets.'
 ;
+footnote1
 
 *
 Note: This compares the column COUNTY_CODE from SC_listing and column 
