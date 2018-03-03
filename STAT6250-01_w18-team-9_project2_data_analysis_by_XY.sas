@@ -56,6 +56,25 @@ Followup Steps: Use Facility status variable as a filter to count opening
 facilities only, and better handle missing data, e.g., by using a previous year's
 data or a rolling average of previous years' data as a proxy.
 ;
+proc freq
+		data=HL_SC_Analytic_file noprint;
+		tables COUNTY_NAME / noprint out=county_freq;
+run;
+* use proc sort to create a temporary sorted table in descending by
+county_freq;
+proc sort
+        data=county_freq
+        out=county_freq_sort
+    ;
+    by descending count;
+run;
+* use proc print to print out top 10 results in the frequency count in facility numbers;
+proc print
+        data=county_freq_sort(obs=10)
+    ;
+run;
+
+
 
 title1
 'Research question: Can gross patient revenue (SC_16) be used to predict total operating revenue for special care facilities in 2016?'
@@ -79,6 +98,27 @@ method to find actual association between the variables.
 Followup Steps: A more rigorous way of testing the relationship can use an 
 inferential statistical technique like linear regression.
 ;
+
+proc format;
+	value NET_PATIENT_REV_TOTL_bins
+	low-<2959614="Q1 Patient"
+        2959614-<4874814="Q2 Patient"
+        4874814-<6477886="Q3 Patient"
+        6477886-high="Q4 Patient"
+    ;
+proc freq
+	data= SC_data16_raw_sorted;
+	table 
+		NET_PATIENT_REV_TOTL
+		*GRO_REV_TOTL
+		/missing norow nocol nopercent
+	;
+	format
+		GRO_REV_TOTL GRO_REV_TOTL_bins.
+		NET_PATIENT_REV_TOTL NET_PATIENT_REV_TOTL_bins.
+;
+Run;
+
 
 title1
 'Research Question: What is the top ten counties have highest special care total net patient revenue in 2016?'
@@ -106,3 +146,55 @@ Followup Steps: Use Facility status variable as a filter to count opening
 facilities only, and better handle missing data, e.g., by using a previous 
 year's data or a rolling average of previous years' data as a proxy.
 ;
+
+data SC_data_XY;
+	retain 	
+		OSHPD_ID
+		FAC_NAME
+		CITY
+		COUNTY_CODE
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	keep
+		OSHPD_ID
+		FAC_NAME
+		CITY
+		COUNTY_CODE
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	merge 
+		SC_listing_raw_sorted
+		SC_data16_raw_sorted
+;
+	by
+		OSHPD_ID
+;
+Run;
+
+
+
+proc sort
+        data=SC_data_XY
+        out=SC_data_XY_temp
+    ;
+    	by 
+		descending NET_PATIENT_REV_TOTL;
+run;
+
+proc print
+        data=SC_data_XY_temp(obs=10)
+    ;
+    id
+		FAC_NAME COUNTY_NAME
+    ;
+    var NET_PATIENT_REV_TOTL
+        
+    ;
+run;
+
+title;
+footnote;
