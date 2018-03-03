@@ -506,7 +506,7 @@ proc sort
     by descending count;
 run;
 
-ata SC_data_XY;
+DATA SC_data_XY;
 	retain 	
 		OSHPD_ID
 		FAC_NAME
