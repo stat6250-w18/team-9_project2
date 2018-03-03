@@ -112,8 +112,14 @@ proc format;
         690879-<1369635="Q3 NET_FRM_OPER"
         1369635-high="Q4 NET_FRM_OPER"
     ;
-run;
-
+	value NET_PATIENT_REV_TOTL_bins
+	low-<2959614="Q1 Patient"
+        2959614-<4874814="Q2 Patient"
+        4874814-<6477886="Q3 Patient"
+        6477886-high="Q4 Patient"
+    ;
+Run
+;
 
 * setup environmental parameters;
 %let inputDataset1URL =
@@ -489,3 +495,50 @@ data SC_analytic_file_TT2;
         input(REVENUE15,best12.)
     ;
 run;
+
+*Data preperation part by XY:
+* use proc sort to create a temporary sorted table in descending by
+county_freq;
+proc sort
+        data=county_freq
+        out=county_freq_sort
+    ;
+    by descending count;
+run;
+
+ata SC_data_XY;
+	retain 	
+		OSHPD_ID
+		FAC_NAME
+		CITY
+		COUNTY_CODE
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	keep
+		OSHPD_ID
+		FAC_NAME
+		CITY
+		COUNTY_CODE
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	merge 
+		SC_listing_raw_sorted
+		SC_data16_raw_sorted
+;
+	by
+		OSHPD_ID
+;
+Run;
+proc sort
+        data=SC_data_XY
+        out=SC_data_XY_temp
+    ;
+    	by 
+		descending NET_PATIENT_REV_TOTL;
+run;
+
+
