@@ -36,12 +36,21 @@ title1
 title2
 'Rationale: This should help identify the specific distribution of the health services.'
 ;
+footnote1
+'Most of counties has the similar number of hospitals and special clinic in CA except LOS ANGELES which has more than half number of SC.'
+;
+footnote2
+'The LOS ANGELES has the most number of hospitals, which is 124, and special clinic, which is 189, and the number is such bigger than others.'
+;
+footnote3
+'All the counties have at least one hospital, and about 15 counties do not have a special clinic in CA.'
+;
 
 *
-Methodology: When combining the HL_listing and SC_listing, we can clear see the 
-information of hosptials and special care clinics in the one table. Then use proc
-mean and proc print to carry out the distribution of the hospital and SC clinics
-in the county column.
+Methodology: First, use DATA to create two temp dataset and use IF statemetn to
+make the temp dataset show the count number for hospitals and special clinic. 
+Then merging the two temp dataset to create the new dataset which called 
+distribution by using COUNTY_NAME. Finally, use pro print to display the result.
 
 Limitation: If there are duplicate values with respect to the columns specified, 
 thenrows are typically moved around as little as possible, meaning that they 
@@ -125,20 +134,22 @@ footnote;
 title1
 'Research Question: What are the top 10 counties with the highest mean value of scale for Hosptials by using the "TOTAL_BEDS" column? And it's there any relationship between the scale and the distribution in each county'
 ;
-
 title2
-'Rationale: This would help research the reason of the number of hosptials in each county'
+'Rationale: This would help research the reason of the number of hosptials in each county.'
 ;
 footnote1
-'
+'The NAPA county has the highest mean value of hosptials scale which is 593 beds per hospital.'
 ;
+footnote2
+'Combining the result with the result of research question1, the LOS ANGELES has the biggest number of beds, which is 28024(226*124).
+;
+
 
 *
 Methodology: Using proc sort to create a temporary sorted table in 
 descending by HL_SC_Analytic. Then, use proc print to display the first
 10 row of the sorted dataset and use WHERE statement to limiting the range.
-And merge the table about the distribution and the table about the hosptials
-scale. Final, use proc print to display them.
+Final, use proc print to display them.
 
 Limitation: This methodology does not account for total_bed with 
 missing data, nor does it attempt to validate data in any way, like filtering 
@@ -174,14 +185,13 @@ proc sort
 run;
 proc print
         noobs
-        data=HL_listing_raw_sorted_temp_LS
-		out= HL_SCALE
+        data=HL_listing_raw_sorted_temp_LS(obs=10)
     ;
     id
         COUNTY_NAME
     ;
     var
-        TOTAL_BEDS(RENAME=(TOTAL_BEDS=HL_BEDS))
+        TOTAL_BEDS
     ;
 run;
 title;
@@ -191,18 +201,21 @@ footnote;
 *******************************************************************************;
 
 title1
-'Research Question: What are the top 10 counties with the highest mean value of net patient revenue for SC clinics?'
+'Research Question: What are the mean value of net patient revenue for special clinics?'
 ;
-
 title2
 'Rationale: This would help identify the which county have the higher demand of health servics.'
 ;
-
+footnote1
+'The MONTEREY county has the highest mean value of net patient revenue, which is 6,994,020.5 at 2016'
+;
+footnote2
+'The SANTA CLARA has the highest range of net patient revenue, which is 43,554,183.0 at 2016. And this county also has the biggest number of net patient revenue, which is 43,692,512.0 at 2016'
+;
 *
 Methodology: After merging SC_listing and SC_data, we get more information about
-special care clinics. Then, use proc sort to create a temporary sorted table in 
-descending by SC_data_analytic_file. Finally, use proc print to display the first
-10 row of the sorted dataset and use IF statement to limiting the range.
+special care clinics. Then, use proc mean to get the mean, range, max and min value
+of the total net patient revenue for special clinic at 2016. 
 
 Limitation: This methodology does not account for net patient revenue with 
 missing data, nor does it attempt to validate data in any way, like filtering 
@@ -212,70 +225,23 @@ Possible Follow-up Step: More carefully clean values in order to filter out any
 possible illegal values, and better handle missing data, e.g., by add more limitation
 for the row which may be sorted.
 ;
-DATA SC_data_LS;
-	retain 	
-		OSHPD_ID
-		COUNTY_NAME
-		GRO_REV_TOTL
-		NET_PATIENT_REV_TOTL
-;
-	keep
-		OSHPD_ID
-		FAC_NAME
-		COUNTY_NAME
-		GRO_REV_TOTL
-		NET_PATIENT_REV_TOTL
-;
-	merge 
-		SC_listing_raw_sorted
-		SC_data16_raw_sorted
-;
-	by
-		OSHPD_ID
-;
-Run;
-proc sort
-        data=SC_data_LS
-        out=SC_data_LS_temp
+proc means
+        MEAN
+		range
+		max
+		min
+		maxdex=1
+        data=SC_data_XY1
     ;
-    	by 
-		descending NET_PATIENT_REV_TOTL;
-run;
-proc print
-        data=SC_data_LS_temp
-		out=SC_LS
+    class
+        COUNTY_NAME
     ;
-    id
-		COUNTY_NAME
+    var
+        NET_PATIENT_REV_TOTL
     ;
-    var NET_PATIENT_REV_TOTL
-        
+    output
+        out=SC_data_LS
     ;
-run;
-data Camparing;
-	retain
-		COUNTY_NAME
-		NUMBER_HL
-		NUMBER_SC
-		HL_BEDS
-		NET_PATIENT_REV_TOTL
-	;
-	keep
-		COUNTY_NAME
-		NUMBER_HL
-		NUMBER_SC
-		HL_BEDS
-		NET_PATIENT_REV_TOTL
-	;
-	merge
-		distribution
-		HL_SCALE
-		SC_LS
-	;
-run;
-proc print
-	data=Camparing
-;
 run;
 title;
 footnote;
