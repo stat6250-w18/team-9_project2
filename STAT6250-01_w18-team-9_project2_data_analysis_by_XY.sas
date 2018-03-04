@@ -34,13 +34,13 @@ title2
 'Rationale: This should identify counties that have most healthcare facilities in California.'
 ;
 footnote1
-'From the ten counties of most special care facilities and hospital numbers, we can see top five counties are all in south California.'
+'From the ten counties of most special care facilities and hospital numbers, we can see top five counties are all in southern California.'
 ;
-
 footnote2
-'
+'Los Angeles County has the most healthcare facility amount, which accounts for 26.4% of the state total.'
 ;
 footnote3
+'Alameda County is covers most special care and hospital facilities in Northern California, but it is only 1/6 of the amount in Los Angeles County.'
 ;
 
 *
@@ -63,7 +63,8 @@ proc freq
 		data=HL_SC_Analytic_file noprint;
 		tables COUNTY_NAME / noprint out=county_freq;
 run;
-* use proc print to print out top 10 results in the frequency count in facility numbers;
+* use proc print to print out top 10 results in the frequency count in facility 
+numbers;
 proc print
         data=county_freq_sort(obs=10)
     ;
@@ -91,6 +92,17 @@ footnote2
 footnote3
 "Given this apparent correlation based on descriptive methodology, further investigation should be performed using inferential methodology to determine the level of statistical significance of the result."
 ;
+footnote1
+"As shown in the two way table, there was an extremely high correlation between gross total revenue and net patient revenue, that facilities with higher net patient grants tend to have higher gross revenue(including operation revenue)."
+;
+
+footnote2
+"Possible explanations for this correlation include hospitals with larger operation size tend to receive more patient amount, and more credibility in reputation, so grants from public and organizations will be higher."
+;
+
+footnote3
+"Given this apparent correlation based on descriptive methodology, further investigation should be performed using inferential methodology to determine the level of statistical significance of the result."
+;
 
 *
 Methodology: Use proc means to compute 5-number summaries of Gross_Patient_Rev 
@@ -100,13 +112,12 @@ two-way table of the two variables with respect to the created formats.
 
 Limitations: Even though predictive modeling is specified in the research
 questions, this methodology solely relies on a crude descriptive technique
-by looking at correlations along quartile values, which could be too coarse a
-method to find actual association between the variables. 
+by looking at correlations in quartile division, which could be lack of 
+statistical proof for a correlation test. 
 
 Followup Steps: A more rigorous way of testing the relationship can use an 
 inferential statistical technique like linear regression.
 ;
-
 proc freq
 	data= SC_data16_raw_sorted;
 	table 
@@ -119,7 +130,8 @@ proc freq
 		NET_PATIENT_REV_TOTL NET_PATIENT_REV_TOTL_bins.
 ;
 Run;
-
+title;
+footnote;
 
 title1
 'Research Question: What is the top ten counties have highest special care total net patient revenue in 2016?'
@@ -129,15 +141,22 @@ title2
 ;
 footnote1
 
+'After using a proc means method to get an average of 2016 net patient revenue for all the counties, we have the state-wide mean net patient revenue of 5047746.68'
+;
+footnote2
+'In the 10 counties listed, their annual net patient revenue is 2-8 times of the state-wide average.'
+;
+footnote3
+'We can infer that there is a huge gap in healthcare facilities anual income among different areas in california.'
+; 
 *
 Note: This compares the column COUNTY_CODE from SC_listing and column 
 NET_PATIENT_REV_TOTL from SC_data16.
 
-Methodology: When combining SC_data16 and SC_listing during data preparation, 
-use PROC MEANS to get the mean value of net patient revenue in each county, 
-and output the results to a temporary dataset, and use PROC SORT to extract
-and sort just the means the temporary dateset. Finally, use proc print here 
-to display the first 10 rows of the sorted dataset.
+Methodology: First, combine SC_data16 and SC_listing with desired variables 
+into a temp data set, then  use PROC SORT to extract and sort just the means
+the temporary dateset. Finally, use proc print here to display the first 10 
+rows of the sorted dataset.
 
 Limitations: This methodology does not account for hospitals/clinics with 
 missing data, or facilities having suspend status (not in normal opening 
@@ -149,11 +168,16 @@ facilities only, and better handle missing data, e.g., by using a previous
 year's data or a rolling average of previous years' data as a proxy.
 ;
 
+proc means
+		data=SC_data_analytic_file;
+		var NET_PATIENT_REV_TOTL;
+run;
+
 proc print
-        data=SC_data_XY_temp(obs=10)
+        data=SC_data_XY1_temp(obs=10)
     ;
     id
-		FAC_NAME
+		COUNTY_NAME
     ;
     var NET_PATIENT_REV_TOTL
         
