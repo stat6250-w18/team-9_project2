@@ -51,6 +51,73 @@ Possible Follow-up Step: Try to use some data visualization skills to create a
 good chart to make the result more clearly.
 ;
 
+proc sort data=HL_Listing_raw_sorted;
+	by COUNTY_NAME;
+run;
+data work1;
+	set HL_Listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
+		LICENSE_NUM
+		FACILITY_LEVEL
+		ADDRESS
+		CITY
+		ZIP_CODE
+		COUNTY_CODE
+		ER_SERVICE
+		TOTAL_BEDS
+		FACILITY_STATUS_DESC
+		FACILITY_STATUS_DATE
+		LICENSE_TYPE
+		LICENSE_CATEGORY);
+	by COUNTY_NAME;
+	if first.COUNTY_NAME then 
+		NUMBER_HL=0;
+		NUMBER_HL+1;
+	if last.COUNTY_NAME then output;
+run;
+proc sort data=SC_listing_raw_sorted;
+	by COUNTY_NAME;
+run;
+data work2;
+	set SC_listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
+		LICENSE_NUM
+		ADDRESS
+		CITY
+		ZIP_CODE
+		COUNTY_CODE
+		FACILITY_STATUS_DESC
+		FACILITY_STATUS_DATE
+		LICENSE_TYPE
+		LICENSE_CATEGORY);
+	by COUNTY_NAME;
+	if first.COUNTY_NAME then 
+		NUMBER_SC=0;
+		NUMBER_SC+1;
+	if last.COUNTY_NAME then output;
+run;
+data distribution_LS;
+	retain
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+	;
+	keep
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+	;
+	merge
+		work1
+		work2
+	;
+	by
+		COUNTY_NAME
+	;
+run;
+
+proc print data=distribution_LS;
+run;
+title;
+footnote;
 *******************************************************************************;
 * Research Question Analysis Starting Point;
 *******************************************************************************;
@@ -62,11 +129,14 @@ title1
 title2
 'Rationale: This would help research the reason of the number of hosptials in each county'
 ;
+footnote1
+'
+;
 
 *
 Methodology: Using proc sort to create a temporary sorted table in 
 descending by HL_SC_Analytic. Then, use proc print to display the first
-10 row of the sorted dataset and use IF statement to limiting the range.
+10 row of the sorted dataset and use WHERE statement to limiting the range.
 And merge the table about the distribution and the table about the hosptials
 scale. Final, use proc print to display them.
 
@@ -79,6 +149,43 @@ values in order to filter out any possible illegal values, and better handle
 missing data.
 ;
 
+proc means
+        MEAN
+        noprint
+        data=HL_listing_raw_sorted
+    ;
+    class
+        COUNTY_NAME
+    ;
+    var
+        TOTAL_BEDS
+    ;
+    output
+        out=HL_listing_raw_sorted_temp_LS
+    ;
+run;
+
+proc sort
+        data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
+    ;
+    by
+        descending TOTAL_BEDS
+    ;
+run;
+proc print
+        noobs
+        data=HL_listing_raw_sorted_temp_LS
+		out= HL_SCALE
+    ;
+    id
+        COUNTY_NAME
+    ;
+    var
+        TOTAL_BEDS(RENAME=(TOTAL_BEDS=HL_BEDS))
+    ;
+run;
+title;
+footnote;
 *******************************************************************************;
 * Research Question Analysis Starting Point;
 *******************************************************************************;
@@ -105,3 +212,70 @@ Possible Follow-up Step: More carefully clean values in order to filter out any
 possible illegal values, and better handle missing data, e.g., by add more limitation
 for the row which may be sorted.
 ;
+DATA SC_data_LS;
+	retain 	
+		OSHPD_ID
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	keep
+		OSHPD_ID
+		FAC_NAME
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	merge 
+		SC_listing_raw_sorted
+		SC_data16_raw_sorted
+;
+	by
+		OSHPD_ID
+;
+Run;
+proc sort
+        data=SC_data_LS
+        out=SC_data_LS_temp
+    ;
+    	by 
+		descending NET_PATIENT_REV_TOTL;
+run;
+proc print
+        data=SC_data_LS_temp
+		out=SC_LS
+    ;
+    id
+		COUNTY_NAME
+    ;
+    var NET_PATIENT_REV_TOTL
+        
+    ;
+run;
+data Camparing;
+	retain
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+		HL_BEDS
+		NET_PATIENT_REV_TOTL
+	;
+	keep
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+		HL_BEDS
+		NET_PATIENT_REV_TOTL
+	;
+	merge
+		distribution
+		HL_SCALE
+		SC_LS
+	;
+run;
+proc print
+	data=Camparing
+;
+run;
+title;
+footnote;
