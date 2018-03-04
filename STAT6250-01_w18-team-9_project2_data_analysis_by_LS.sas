@@ -94,7 +94,7 @@ data work2;
 		NUMBER_SC+1;
 	if last.COUNTY_NAME then output;
 run;
-data distribution;
+data distribution_LS;
 	retain
 		COUNTY_NAME
 		NUMBER_HL
@@ -114,7 +114,7 @@ data distribution;
 	;
 run;
 
-proc print data=distribution;
+proc print data=distribution_LS;
 run;
 title;
 footnote;
@@ -129,11 +129,14 @@ title1
 title2
 'Rationale: This would help research the reason of the number of hosptials in each county'
 ;
+footnote1
+'
+;
 
 *
 Methodology: Using proc sort to create a temporary sorted table in 
 descending by HL_SC_Analytic. Then, use proc print to display the first
-10 row of the sorted dataset and use IF statement to limiting the range.
+10 row of the sorted dataset and use WHERE statement to limiting the range.
 And merge the table about the distribution and the table about the hosptials
 scale. Final, use proc print to display them.
 
@@ -146,6 +149,43 @@ values in order to filter out any possible illegal values, and better handle
 missing data.
 ;
 
+proc means
+        MEAN
+        noprint
+        data=HL_listing_raw_sorted
+    ;
+    class
+        COUNTY_NAME
+    ;
+    var
+        TOTAL_BEDS
+    ;
+    output
+        out=HL_listing_raw_sorted_temp_LS
+    ;
+run;
+
+proc sort
+        data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
+    ;
+    by
+        descending TOTAL_BEDS
+    ;
+run;
+proc print
+        noobs
+        data=HL_listing_raw_sorted_temp_LS
+		out= HL_SCALE
+    ;
+    id
+        COUNTY_NAME
+    ;
+    var
+        TOTAL_BEDS(RENAME=(TOTAL_BEDS=HL_BEDS))
+    ;
+run;
+title;
+footnote;
 *******************************************************************************;
 * Research Question Analysis Starting Point;
 *******************************************************************************;
@@ -172,3 +212,70 @@ Possible Follow-up Step: More carefully clean values in order to filter out any
 possible illegal values, and better handle missing data, e.g., by add more limitation
 for the row which may be sorted.
 ;
+DATA SC_data_LS;
+	retain 	
+		OSHPD_ID
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	keep
+		OSHPD_ID
+		FAC_NAME
+		COUNTY_NAME
+		GRO_REV_TOTL
+		NET_PATIENT_REV_TOTL
+;
+	merge 
+		SC_listing_raw_sorted
+		SC_data16_raw_sorted
+;
+	by
+		OSHPD_ID
+;
+Run;
+proc sort
+        data=SC_data_LS
+        out=SC_data_LS_temp
+    ;
+    	by 
+		descending NET_PATIENT_REV_TOTL;
+run;
+proc print
+        data=SC_data_LS_temp
+		out=SC_LS
+    ;
+    id
+		COUNTY_NAME
+    ;
+    var NET_PATIENT_REV_TOTL
+        
+    ;
+run;
+data Camparing;
+	retain
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+		HL_BEDS
+		NET_PATIENT_REV_TOTL
+	;
+	keep
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+		HL_BEDS
+		NET_PATIENT_REV_TOTL
+	;
+	merge
+		distribution
+		HL_SCALE
+		SC_LS
+	;
+run;
+proc print
+	data=Camparing
+;
+run;
+title;
+footnote;
