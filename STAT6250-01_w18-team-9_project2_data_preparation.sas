@@ -542,4 +542,98 @@ proc sort
 		descending NET_PATIENT_REV_TOTL;
 run;
 
+*
+First, use DATA to create two temp dataset and use IF statemetn to
+make the temp dataset show the count number for hospitals and special clinic. 
+Then merging the two temp dataset to create the new dataset which called 
+distribution by using COUNTY_NAME by LS.
+; 
+proc sort data=HL_Listing_raw_sorted;
+	by COUNTY_NAME;
+run;
+data work1;
+	set HL_Listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
+		LICENSE_NUM
+		FACILITY_LEVEL
+		ADDRESS
+		CITY
+		ZIP_CODE
+		COUNTY_CODE
+		ER_SERVICE
+		TOTAL_BEDS
+		FACILITY_STATUS_DESC
+		FACILITY_STATUS_DATE
+		LICENSE_TYPE
+		LICENSE_CATEGORY);
+	by COUNTY_NAME;
+	if first.COUNTY_NAME then 
+		NUMBER_HL=0;
+		NUMBER_HL+1;
+	if last.COUNTY_NAME then output;
+run;
+proc sort data=SC_listing_raw_sorted;
+	by COUNTY_NAME;
+run;
+data work2;
+	set SC_listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
+		LICENSE_NUM
+		ADDRESS
+		CITY
+		ZIP_CODE
+		COUNTY_CODE
+		FACILITY_STATUS_DESC
+		FACILITY_STATUS_DATE
+		LICENSE_TYPE
+		LICENSE_CATEGORY);
+	by COUNTY_NAME;
+	if first.COUNTY_NAME then 
+		NUMBER_SC=0;
+		NUMBER_SC+1;
+	if last.COUNTY_NAME then output;
+run;
+data distribution_LS;
+	retain
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+	;
+	keep
+		COUNTY_NAME
+		NUMBER_HL
+		NUMBER_SC
+	;
+	merge
+		work1
+		work2
+	;
+	by
+		COUNTY_NAME
+	;
+run;
 
+*
+Using proc sort to create a temporary sorted table in 
+descending by HL_SC_Analytic by LS.
+;
+proc means
+        MEAN
+        noprint
+        data=HL_listing_raw_sorted
+    ;
+    class
+        COUNTY_NAME
+    ;
+    var
+        TOTAL_BEDS
+    ;
+    output
+        out=HL_listing_raw_sorted_temp_LS
+    ;
+run;
+proc sort
+        data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
+    ;
+    by
+        descending TOTAL_BEDS
+    ;
+run;
