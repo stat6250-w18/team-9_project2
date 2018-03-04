@@ -506,7 +506,7 @@ proc sort
     by descending count;
 run;
 
-ata SC_data_XY;
+Data SC_data_XY1;
 	retain 	
 		OSHPD_ID
 		FAC_NAME
@@ -534,8 +534,8 @@ ata SC_data_XY;
 ;
 Run;
 proc sort
-        data=SC_data_XY
-        out=SC_data_XY_temp
+        data=SC_data_XY1
+        out=SC_data_XY1_temp
     ;
     	by 
 		descending NET_PATIENT_REV_TOTL;
