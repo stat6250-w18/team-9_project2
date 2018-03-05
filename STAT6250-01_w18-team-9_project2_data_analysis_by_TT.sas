@@ -145,20 +145,6 @@ any possible illegal values, and better handle missing data, e.g., by using
 a previous year's data or a rolling average of previous years' data as a proxy.
 ;
 
-proc sql;
-    create table SC_analytic_file_TT2_print AS
-        select
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            Gross_Patient_Revenue_Diff_1516
-        from 
-            SC_analytic_file_TT2
-        order by
-            Gross_Patient_Revenue_Diff_1516 descending
-	;
-quit;
-
 *
 List top 10 clinics experience increase in profit from 15-16
 ;

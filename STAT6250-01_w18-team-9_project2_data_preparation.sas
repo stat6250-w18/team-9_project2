@@ -430,6 +430,20 @@ proc sql;
 	;
 quit;
 
+proc sql;
+    create table SC_analytic_file_TT2_print AS
+        select
+            OSHPD_ID,
+            FAC_NAME,
+            FAC_CITY,
+            Gross_Patient_Revenue_Diff_1516
+        from 
+            SC_analytic_file_TT2
+        order by
+            Gross_Patient_Revenue_Diff_1516 descending
+	;
+quit;
+
 * combine SC15_analytic_file and SC16_analytic_file,
 and compute PROFIT_DIFFERENCES_1516;
 
@@ -499,15 +513,19 @@ run;
 *Data preperation part by XY:
 * use proc sort to create a temporary sorted table in descending by
 county_freq;
+proc freq
+	data=HL_SC_Analytic_file noprint;
+	tables COUNTY_NAME / noprint 
+	out=county_freq
+	;
+run;
 proc sort
-        data=county_freq
-        out=county_freq_sort
+    data=county_freq
+    out=county_freq_sort
     ;
     by descending count;
 run;
-
-Data SC_data_XY1;
-
+data SC_data_XY1;
 	retain 	
 		OSHPD_ID
 		FAC_NAME
@@ -516,7 +534,7 @@ Data SC_data_XY1;
 		COUNTY_NAME
 		GRO_REV_TOTL
 		NET_PATIENT_REV_TOTL
-;
+	;
 	keep
 		OSHPD_ID
 		FAC_NAME
@@ -525,21 +543,22 @@ Data SC_data_XY1;
 		COUNTY_NAME
 		GRO_REV_TOTL
 		NET_PATIENT_REV_TOTL
-;
+	;
 	merge 
 		SC_listing_raw_sorted
 		SC_data16_raw_sorted
-;
+	;
 	by
 		OSHPD_ID
-;
-Run;
+	;
+run;
 proc sort
-        data=SC_data_XY1
-        out=SC_data_XY1_temp
+    data=SC_data_XY1
+    out=SC_data_XY1_temp
     ;
-    	by 
-		descending NET_PATIENT_REV_TOTL;
+   	by 
+		descending NET_PATIENT_REV_TOTL
+	;
 run;
 
 *
@@ -548,7 +567,8 @@ make the temp dataset show the count number for hospitals and special clinic.
 Then merging the two temp dataset to create the new dataset which called 
 distribution by using COUNTY_NAME by LS.
 ; 
-proc sort data=HL_Listing_raw_sorted;
+proc sort 
+	data=HL_Listing_raw_sorted;
 	by COUNTY_NAME;
 run;
 data work1;
@@ -569,9 +589,11 @@ data work1;
 	if first.COUNTY_NAME then 
 		NUMBER_HL=0;
 		NUMBER_HL+1;
-	if last.COUNTY_NAME then output;
+	if last.COUNTY_NAME then 
+		output;
 run;
-proc sort data=SC_listing_raw_sorted;
+proc sort 
+	data=SC_listing_raw_sorted;
 	by COUNTY_NAME;
 run;
 data work2;
@@ -589,7 +611,8 @@ data work2;
 	if first.COUNTY_NAME then 
 		NUMBER_SC=0;
 		NUMBER_SC+1;
-	if last.COUNTY_NAME then output;
+	if last.COUNTY_NAME then 
+		output;
 run;
 data distribution_LS;
 	retain
@@ -631,9 +654,9 @@ proc means
     ;
 run;
 proc sort
-        data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
+    data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
     ;
     by
-        descending TOTAL_BEDS
+    descending TOTAL_BEDS
     ;
 run;
