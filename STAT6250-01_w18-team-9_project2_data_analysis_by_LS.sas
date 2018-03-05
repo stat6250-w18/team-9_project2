@@ -57,11 +57,13 @@ Possible Follow-up Step: Try to use some data visualization skills to create a
 good chart to make the result more clearly.
 ;
 
-
-proc print data=distribution_LS;
+proc print 
+	data=distribution_LS;
 run;
 title;
 footnote;
+
+
 *******************************************************************************;
 * Research Question Analysis Starting Point;
 *******************************************************************************;
@@ -93,11 +95,9 @@ values in order to filter out any possible illegal values, and better handle
 missing data.
 ;
 
-
-
 proc print
-        noobs
-        data=HL_listing_raw_sorted_temp_LS(obs=10)
+    noobs
+    data=HL_listing_raw_sorted_temp_LS(obs=10)
     ;
     id
         COUNTY_NAME
@@ -108,6 +108,8 @@ proc print
 run;
 title;
 footnote;
+
+
 *******************************************************************************;
 * Research Question Analysis Starting Point;
 *******************************************************************************;
@@ -126,16 +128,16 @@ footnote2
 ;
 *
 Methodology: After merging SC_listing and SC_data, we get more information about
-special care clinics. Then, use proc mean to get the mean, range, max and min value
-of the total net patient revenue for special clinic at 2016. 
+special care clinics. Then, use proc mean to get the mean, range, max and min 
+value of the total net patient revenue for special clinic at 2016. 
 
 Limitation: This methodology does not account for net patient revenue with 
 missing data, nor does it attempt to validate data in any way, like filtering 
 for percentages between 0 and 1.
 
 Possible Follow-up Step: More carefully clean values in order to filter out any 
-possible illegal values, and better handle missing data, e.g., by add more limitation
-for the row which may be sorted.
+possible illegal values, and better handle missing data, e.g., by add more 
+limitation for the row which may be sorted.
 ;
 proc means
         MEAN

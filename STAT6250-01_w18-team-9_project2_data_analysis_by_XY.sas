@@ -59,14 +59,11 @@ Followup Steps: Use Facility status variable as a filter to count opening
 facilities only, and better handle missing data, e.g., by using a previous year's
 data or a rolling average of previous years' data as a proxy.
 ;
-proc freq
-		data=HL_SC_Analytic_file noprint;
-		tables COUNTY_NAME / noprint out=county_freq;
-run;
+
 * use proc print to print out top 10 results in the frequency count in facility 
 numbers;
 proc print
-        data=county_freq_sort(obs=10)
+    data=county_freq_sort(obs=10)
     ;
 run;
 title;
@@ -129,7 +126,7 @@ proc freq
 		GRO_REV_TOTL GRO_REV_TOTL_bins.
 		NET_PATIENT_REV_TOTL NET_PATIENT_REV_TOTL_bins.
 ;
-Run;
+run;
 title;
 footnote;
 
@@ -169,20 +166,19 @@ year's data or a rolling average of previous years' data as a proxy.
 ;
 
 proc means
-		data=SC_data_analytic_file;
-		var NET_PATIENT_REV_TOTL;
+	data=SC_data_analytic_file;
+	var NET_PATIENT_REV_TOTL;
 run;
 
 proc print
-        data=SC_data_XY1_temp(obs=10)
+    data=SC_data_XY1_temp(obs=10)
     ;
     id
 		COUNTY_NAME
     ;
-    var NET_PATIENT_REV_TOTL
-        
+    var 
+		NET_PATIENT_REV_TOTL
     ;
 run;
-
 title;
 footnote;
