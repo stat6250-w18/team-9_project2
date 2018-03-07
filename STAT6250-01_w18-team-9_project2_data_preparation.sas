@@ -118,8 +118,7 @@ proc format;
         4874814-<6477886="Q3 Patient"
         6477886-high="Q4 Patient"
     ;
-Run
-;
+run;
 
 * setup environmental parameters;
 %let inputDataset1URL =
@@ -245,8 +244,8 @@ run;
 * combine HL_listing data and SC_listing data vertically;
 
 data HL_SC_Analytic_file;
-    set
-        HL_listing_raw_sorted(in=HL_row)
+	set
+		HL_listing_raw_sorted(in=HL_row)
         SC_listing_raw_sorted(in=SC_row)
     ;
 	retain
@@ -384,67 +383,34 @@ data SC_data_analytic_file;
 run;
 
 
-* create SC15_analytic_file and SC16_analytic_file for further analysis - TT;
+* create SC16_analytic_file for further analysis - TT;
 
-proc sql;
-    create table SC15_analytic_file as
-        select 
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            GRO_REV_TOTL,
-            REV_OPER_TOTL,
-            EXP_OPER_TOTL,
-            NET_FRM_OPER
-        from
-            SC_data15_raw_sorted
+data SC16_analytic_file;
+	retain
+		OSHPD_ID
+		FAC_NAME
+        FAC_CITY
+       	GRO_REV_TOTL
+        REV_OPER_TOTL
+        EXP_OPER_TOTL
+        NET_FRM_OPER		
 	;
-quit;
-
-proc sql;
-    create table SC16_analytic_file as
-        select 
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            GRO_REV_TOTL,
-            REV_OPER_TOTL,
-            EXP_OPER_TOTL,
-            NET_FRM_OPER
-        from
-            SC_data16_raw_sorted
+	keep
+		OSHPD_ID
+		FAC_NAME
+        FAC_CITY
+       	GRO_REV_TOTL
+        REV_OPER_TOTL
+        EXP_OPER_TOTL
+        NET_FRM_OPER
 	;
-quit;
-
-proc sql;
-    create table SC_analytic_file_TT1_print AS
-        select
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            PROFIT_DIFFERENCES_1516
-        from 
-            SC_analytic_file_TT1
-        order by
-            PROFIT_DIFFERENCES_1516 ascending
+	set
+		SC_data16_raw_sorted
 	;
-quit;
+run;
+*/
 
-proc sql;
-    create table SC_analytic_file_TT2_print AS
-        select
-            OSHPD_ID,
-            FAC_NAME,
-            FAC_CITY,
-            Gross_Patient_Revenue_Diff_1516
-        from 
-            SC_analytic_file_TT2
-        order by
-            Gross_Patient_Revenue_Diff_1516 descending
-	;
-quit;
-
-* combine SC15_analytic_file and SC16_analytic_file,
+* combine SC_data15_raw_sorted and SC_data16_raw_sorted,
 and compute PROFIT_DIFFERENCES_1516;
 
 data SC_analytic_file_TT1;
@@ -465,11 +431,11 @@ data SC_analytic_file_TT1;
         PROFIT_DIFFERENCES_1516
     ;
     merge
-        SC15_analytic_file(rename=(NET_FRM_OPER=PROFIT15))
-        SC16_analytic_file(rename=(NET_FRM_OPER=PROFIT16))
+        SC_data15_raw_sorted(rename=(NET_FRM_OPER=PROFIT15))
+        SC_data16_raw_sorted(rename=(NET_FRM_OPER=PROFIT16))
     ;
     by
-        OSHPD_ID
+		OSHPD_ID
     ;
     PROFIT_DIFFERENCES_1516=
         input(PROFIT16,best12.)
@@ -478,7 +444,7 @@ data SC_analytic_file_TT1;
     ;
 run;
 
-* combine SC15_analytic_file and SC16_analytic_file, 
+* combine SC_data15_raw_sorted and SC_data16_raw_sorted, 
 and compute Gross_Patient_Revenue_Diff_1516;
 
 data SC_analytic_file_TT2;
@@ -497,11 +463,11 @@ data SC_analytic_file_TT2;
         Gross_Patient_Revenue_Diff_1516 
     ;
     merge
-        SC15_analytic_file(rename=(GRO_REV_TOTL=REVENUE15))
-        SC16_analytic_file(rename=(GRO_REV_TOTL=REVENUE16))
+        SC_data15_raw_sorted(rename=(GRO_REV_TOTL=REVENUE15))
+        SC_data16_raw_sorted(rename=(GRO_REV_TOTL=REVENUE16))
     ;
     by
-        OSHPD_ID
+		OSHPD_ID
     ;
     Gross_Patient_Revenue_Diff_1516=
         input(REVENUE16,best12.)
@@ -509,6 +475,25 @@ data SC_analytic_file_TT2;
         input(REVENUE15,best12.)
     ;
 run;
+
+
+*use proc sort to create a temporary sorted table 
+in descending by SC_analytic_file_TT1_print and
+SC_analytic_file_TT2_print;
+
+proc sort
+        data=SC_analytic_file_TT1
+        out=SC_analytic_file_TT1_print
+    ;
+    by descending PROFIT_DIFFERENCES_1516;
+run;
+proc sort
+        data=SC_analytic_file_TT2
+        out=SC_analytic_file_TT2_print
+    ;
+    by descending Gross_Patient_Revenue_Diff_1516;
+run;
+
 
 *Data preperation part by XY:
 * use proc sort to create a temporary sorted table in descending by
@@ -639,7 +624,7 @@ Using proc sort to create a temporary sorted table in
 descending by HL_SC_Analytic by LS.
 ;
 proc means
-        MEAN
+        mean
         noprint
         data=HL_listing_raw_sorted
     ;
@@ -654,9 +639,9 @@ proc means
     ;
 run;
 proc sort
-    data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
+    	data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
     ;
     by
-    descending TOTAL_BEDS
+    	descending TOTAL_BEDS
     ;
 run;

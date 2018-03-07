@@ -87,17 +87,6 @@ proc print
     ;
 run;
 
-*
-Shows a histogram combined with two density plots. 
-;
-proc sgplot 
-    data=SC_analytic_file_TT1;
-    histogram PROFIT_DIFFERENCES_1516;
-    density PROFIT_DIFFERENCES_1516;
-    density PROFIT_DIFFERENCES_1516 / type=kernel;
-    keylegend / location=inside position=topright;
-run;
-
 title;
 footnote;
 
