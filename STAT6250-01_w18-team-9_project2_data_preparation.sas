@@ -244,29 +244,29 @@ run;
 * combine HL_listing data and SC_listing data vertically;
 
 data HL_SC_Analytic_file;
-	set
-		HL_listing_raw_sorted(in=HL_row)
+    set
+	HL_listing_raw_sorted(in=HL_row)
     	SC_listing_raw_sorted(in=SC_row)
     ;
-	retain
-		FACILITY_NAME
-		LICENSE_NUM
-		FACILITY_LEVEL
-		ADDRESS
-		CITY
-		ZIP_CODE
-		COUNTY_CODE
-		COUNTY_NAME
-		ER_SERVICE
-		TOTAL_BEDS
-		FACILITY_STATUS_DESC
-		FACILITY_STATUS_DATE
-		LICENSE_TYPE
-		LICENSE_CATEGORY
-	;
-	by
-		OSHPD_ID
-	;
+    retain
+	FACILITY_NAME
+	LICENSE_NUM
+	FACILITY_LEVEL
+	ADDRESS
+	CITY
+	ZIP_CODE
+	COUNTY_CODE
+	COUNTY_NAME
+	ER_SERVICE
+	TOTAL_BEDS
+	FACILITY_STATUS_DESC
+	FACILITY_STATUS_DATE
+	LICENSE_TYPE
+	LICENSE_CATEGORY
+    ;
+    by
+	OSHPD_ID
+    ;
     if
         HL_row=1
     then
@@ -283,27 +283,27 @@ run;
 * create SC16_analytic_file for further analysis - TT;
 
 data SC16_analytic_file;
-	retain
-		OSHPD_ID
-		FAC_NAME
-		FAC_CITY
-		GRO_REV_TOTL
-		REV_OPER_TOTL
-		EXP_OPER_TOTL
-		NET_FRM_OPER		
-	;
-	keep
-		OSHPD_ID
-		FAC_NAME
-		FAC_CITY
-		GRO_REV_TOTL
-		REV_OPER_TOTL
-		EXP_OPER_TOTL
-		NET_FRM_OPER
-	;
-	set
-		SC_data16_raw_sorted
-	;
+    retain
+	OSHPD_ID
+	FAC_NAME
+	FAC_CITY
+	GRO_REV_TOTL
+	REV_OPER_TOTL
+	EXP_OPER_TOTL
+	NET_FRM_OPER		
+    ;
+    keep
+	OSHPD_ID
+	FAC_NAME
+	FAC_CITY
+	GRO_REV_TOTL
+	REV_OPER_TOTL
+	EXP_OPER_TOTL
+	NET_FRM_OPER
+    ;
+    set
+	SC_data16_raw_sorted
+    ;
 run;
 
 
@@ -332,7 +332,7 @@ data SC_analytic_file_TT1;
         SC_data16_raw_sorted(rename=(NET_FRM_OPER=PROFIT16))
     ;
     by
-		OSHPD_ID
+	OSHPD_ID
     ;
     PROFIT_DIFFERENCES_1516=
         input(PROFIT16,best12.)
@@ -365,7 +365,7 @@ data SC_analytic_file_TT2;
         SC_data16_raw_sorted(rename=(GRO_REV_TOTL=REVENUE16))
     ;
     by
-		OSHPD_ID
+	OSHPD_ID
     ;
     Gross_Patient_Revenue_Diff_1516=
         input(REVENUE16,best12.)
@@ -397,6 +397,7 @@ run;
 *Data preperation part by XY:
 * use proc sort to create a temporary sorted table in descending by
 county_freq;
+
 proc freq
 	data=HL_SC_Analytic_file noprint;
 	tables COUNTY_NAME / noprint 
@@ -406,43 +407,42 @@ run;
 
 proc sort
     data=county_freq
-    out=county_freq_sort
-    ;
+    out=county_freq_sort;
     by descending count;
 run;
 
 data SC_data_XY1;
-	retain 	
-		OSHPD_ID
-		FAC_NAME
-		CITY
-		COUNTY_CODE
-		COUNTY_NAME
-		GRO_REV_TOTL
-		NET_PATIENT_REV_TOTL
-	;
-	keep
-		OSHPD_ID
-		FAC_NAME
-		CITY
-		COUNTY_CODE
-		COUNTY_NAME
-		GRO_REV_TOTL
-		NET_PATIENT_REV_TOTL
-	;
-	merge 
-		SC_listing_raw_sorted
-		SC_data16_raw_sorted
-	;
-	by
-		OSHPD_ID
-	;
+    retain 	
+	OSHPD_ID
+	FAC_NAME
+	CITY
+	COUNTY_CODE
+	COUNTY_NAME
+	GRO_REV_TOTL
+	NET_PATIENT_REV_TOTL
+    ;
+    keep
+	OSHPD_ID
+	FAC_NAME
+	CITY
+	COUNTY_CODE
+	COUNTY_NAME
+	GRO_REV_TOTL
+	NET_PATIENT_REV_TOTL
+    ;
+    merge 
+	SC_listing_raw_sorted
+	SC_data16_raw_sorted
+    ;
+    by
+	OSHPD_ID
+    ;
 run;
 
 proc sort
-	data=SC_data_XY1
-	out=SC_data_XY1_temp;
-	by descending NET_PATIENT_REV_TOTL;
+    	data=SC_data_XY1
+    	out=SC_data_XY1_temp;
+    	by descending NET_PATIENT_REV_TOTL;
 run;
 
 *
@@ -451,6 +451,7 @@ make the temp dataset show the count number for hospitals and special clinic.
 Then merging the two temp dataset to create the new dataset which called 
 distribution by using COUNTY_NAME by LS.
 ; 
+
 proc sort 
 	data=HL_Listing_raw_sorted;
 	by COUNTY_NAME;
