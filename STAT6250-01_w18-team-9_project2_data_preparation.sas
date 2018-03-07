@@ -244,29 +244,29 @@ run;
 * combine HL_listing data and SC_listing data vertically;
 
 data HL_SC_Analytic_file;
-	set
-		HL_listing_raw_sorted(in=HL_row)
-    		SC_listing_raw_sorted(in=SC_row)
+    set
+	HL_listing_raw_sorted(in=HL_row)
+    	SC_listing_raw_sorted(in=SC_row)
     ;
-	retain
-		FACILITY_NAME
-		LICENSE_NUM
-		FACILITY_LEVEL
-		ADDRESS
-		CITY
-		ZIP_CODE
-		COUNTY_CODE
-		COUNTY_NAME
-		ER_SERVICE
-		TOTAL_BEDS
-		FACILITY_STATUS_DESC
-		FACILITY_STATUS_DATE
-		LICENSE_TYPE
-		LICENSE_CATEGORY
-	;
-	by
-		OSHPD_ID
-	;
+    retain
+	FACILITY_NAME
+	LICENSE_NUM
+	FACILITY_LEVEL
+	ADDRESS
+	CITY
+	ZIP_CODE
+	COUNTY_CODE
+	COUNTY_NAME
+	ER_SERVICE
+	TOTAL_BEDS
+	FACILITY_STATUS_DESC
+	FACILITY_STATUS_DATE
+	LICENSE_TYPE
+	LICENSE_CATEGORY
+    ;
+    by
+	OSHPD_ID
+    ;
     if
         HL_row=1
     then
