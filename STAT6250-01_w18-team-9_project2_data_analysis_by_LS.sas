@@ -140,12 +140,12 @@ possible illegal values, and better handle missing data, e.g., by add more
 limitation for the row which may be sorted.
 ;
 proc means
-        MEAN
+		mean
 		range
 		max
 		min
 		maxdex=1
-        data=SC_data_XY1
+		data=SC_data_XY1
     ;
     class
         COUNTY_NAME
