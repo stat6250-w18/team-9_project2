@@ -246,7 +246,7 @@ run;
 data HL_SC_Analytic_file;
 	set
 		HL_listing_raw_sorted(in=HL_row)
-        SC_listing_raw_sorted(in=SC_row)
+    	SC_listing_raw_sorted(in=SC_row)
     ;
 	retain
 		FACILITY_NAME
@@ -329,7 +329,7 @@ data SC_data_analytic_file;
 		NET_FRM_OPER
     ;
     keep
-        OSHPD_ID
+	    OSHPD_ID
 		FACILITY_NAME
 		LICENSE_NUM
 		FACILITY_LEVEL
@@ -389,26 +389,26 @@ data SC16_analytic_file;
 	retain
 		OSHPD_ID
 		FAC_NAME
-        FAC_CITY
-       	GRO_REV_TOTL
-        REV_OPER_TOTL
-        EXP_OPER_TOTL
-        NET_FRM_OPER		
+		FAC_CITY
+		GRO_REV_TOTL
+		REV_OPER_TOTL
+		EXP_OPER_TOTL
+		NET_FRM_OPER		
 	;
 	keep
 		OSHPD_ID
 		FAC_NAME
-        FAC_CITY
-       	GRO_REV_TOTL
-        REV_OPER_TOTL
-        EXP_OPER_TOTL
-        NET_FRM_OPER
+		FAC_CITY
+		GRO_REV_TOTL
+		REV_OPER_TOTL
+		EXP_OPER_TOTL
+		NET_FRM_OPER
 	;
 	set
 		SC_data16_raw_sorted
 	;
 run;
-*/
+
 
 * combine SC_data15_raw_sorted and SC_data16_raw_sorted,
 and compute PROFIT_DIFFERENCES_1516;
@@ -443,6 +443,7 @@ data SC_analytic_file_TT1;
         input(PROFIT15,best12.)
     ;
 run;
+
 
 * combine SC_data15_raw_sorted and SC_data16_raw_sorted, 
 and compute Gross_Patient_Revenue_Diff_1516;
@@ -487,6 +488,7 @@ proc sort
     ;
     by descending PROFIT_DIFFERENCES_1516;
 run;
+
 proc sort
         data=SC_analytic_file_TT2
         out=SC_analytic_file_TT2_print
@@ -504,12 +506,14 @@ proc freq
 	out=county_freq
 	;
 run;
+
 proc sort
     data=county_freq
     out=county_freq_sort
     ;
     by descending count;
 run;
+
 data SC_data_XY1;
 	retain 	
 		OSHPD_ID
@@ -537,13 +541,11 @@ data SC_data_XY1;
 		OSHPD_ID
 	;
 run;
+
 proc sort
-    data=SC_data_XY1
-    out=SC_data_XY1_temp
-    ;
-   	by 
-		descending NET_PATIENT_REV_TOTL
-	;
+	data=SC_data_XY1
+	out=SC_data_XY1_temp;
+	by descending NET_PATIENT_REV_TOTL;
 run;
 
 *
@@ -556,6 +558,7 @@ proc sort
 	data=HL_Listing_raw_sorted;
 	by COUNTY_NAME;
 run;
+
 data work1;
 	set HL_Listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
 		LICENSE_NUM
@@ -577,10 +580,12 @@ data work1;
 	if last.COUNTY_NAME then 
 		output;
 run;
+
 proc sort 
 	data=SC_listing_raw_sorted;
 	by COUNTY_NAME;
 run;
+
 data work2;
 	set SC_listing_raw_sorted(drop=OSHPD_ID FACILITY_NAME
 		LICENSE_NUM
@@ -599,6 +604,7 @@ data work2;
 	if last.COUNTY_NAME then 
 		output;
 run;
+
 data distribution_LS;
 	retain
 		COUNTY_NAME
@@ -623,6 +629,7 @@ run;
 Using proc sort to create a temporary sorted table in 
 descending by HL_SC_Analytic by LS.
 ;
+
 proc means
         mean
         noprint
@@ -638,6 +645,7 @@ proc means
         out=HL_listing_raw_sorted_temp_LS
     ;
 run;
+
 proc sort
     	data=HL_listing_raw_sorted_temp_LS(WHERE=(_STAT_="MEAN"))
     ;
