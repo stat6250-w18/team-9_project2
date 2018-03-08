@@ -36,17 +36,23 @@ title1
 title2
 'Rationale: This should help identify the specific distribution of the health services.'
 ;
+
 footnote1
 'Most of counties has the similar number of hospitals and special clinic in CA except LOS ANGELES which has more than half number of SC.'
 ;
+
 footnote2
 'The LOS ANGELES has the most number of hospitals, which is 124, and special clinic, which is 189, and the number is such bigger than others.'
 ;
+
 footnote3
 'All the counties have at least one hospital, and about 15 counties do not have a special clinic in CA.'
 ;
 
 *
+Note: This compares the column "NUMBER_HL" from work1 to the column of the 
+"NUMBER_SC" from work2.
+
 Methodology: Use pro print to display the result.
 
 Limitation: If there are duplicate values with respect to the columns specified, 
@@ -71,16 +77,18 @@ footnote;
 title1
 'Research Question: What are the top 10 counties with the highest mean value of scale for Hosptials by using the "TOTAL_BEDS" column?'
 ;
+
 title2
 'Rationale: This would help research the reason of the number of hosptials in each county.'
 ;
+
 footnote1
 'The NAPA county has the highest mean value of hosptials scale which is 593 beds per hospital.'
 ;
+
 footnote2
 'Combining the result with the result of research question1, the LOS ANGELES has the biggest number of beds, which is 28024(226*124).'
 ;
-
 
 *
 Methodology:Using proc print to display the first 10 row of the sorted dataset 
@@ -117,16 +125,23 @@ footnote;
 title1
 'Research Question: What are the mean value of net patient revenue for special clinics?'
 ;
+
 title2
 'Rationale: This would help identify the which county have the higher demand of health servics.'
 ;
+
 footnote1
 'The MONTEREY county has the highest mean value of net patient revenue, which is 6,994,020.5 at 2016'
 ;
+
 footnote2
 'The SANTA CLARA has the highest range of net patient revenue, which is 43,554,183.0 at 2016. And this county also has the biggest number of net patient revenue, which is 43,692,512.0 at 2016'
 ;
+
 *
+Note: This compares the column "COUNTY_NAME" from SC_listing and column 
+"NET_PATIENT_REV_TOTL" from SC_data16.
+
 Methodology: After merging SC_listing and SC_data, we get more information about
 special care clinics. Then, use proc mean to get the mean, range, max and min 
 value of the total net patient revenue for special clinic at 2016. 

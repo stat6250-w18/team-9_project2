@@ -30,20 +30,28 @@ X "cd ""%substr(%sysget(SAS_EXECFILEPATH),1,%eval(%length(%sysget(SAS_EXECFILEPA
 title1
 'Research Question: What are the top ten counties that have largest amount for Special Care and hospitals? (consider the two category together)'
 ;
+
 title2
 'Rationale: This should identify counties that have most healthcare facilities in California.'
 ;
+
 footnote1
 'From the ten counties of most special care facilities and hospital numbers, we can see top five counties are all in southern California.'
 ;
+
 footnote2
 'Los Angeles County has the most healthcare facility amount, which accounts for 26.4% of the state total.'
 ;
+
 footnote3
 'Alameda County is covers most special care and hospital facilities in Northern California, but it is only 1/6 of the amount in Los Angeles County.'
 ;
 
 *
+Note: This calculates the total count from the column COUNTY_NAME from SC_listing 
+and column COUNTY_NAME from HL_listing.
+
+
 Methodology: First, combine SC_listing  and HL_listing in data prep file and use
 proc Freq to summarize the frequency of each county and output table as 
 countyfreq. Then, use proc sort to create a temporary sorted table in descending 
@@ -89,6 +97,7 @@ footnote2
 footnote3
 "Given this apparent correlation based on descriptive methodology, further investigation should be performed using inferential methodology to determine the level of statistical significance of the result."
 ;
+
 footnote1
 "As shown in the two way table, there was an extremely high correlation between gross total revenue and net patient revenue, that facilities with higher net patient grants tend to have higher gross revenue(including operation revenue)."
 ;
@@ -133,19 +142,23 @@ footnote;
 title1
 'Research Question: What is the top ten counties have highest special care total net patient revenue in 2016?'
 ;
+
 title2
 'Rationale: This helps identify the counties with significant revenue in healthcare industry. Will be a strong indicator for healthcare tech companies to focus on potential markets.'
 ;
-footnote1
 
+footnote1
 'After using a proc means method to get an average of 2016 net patient revenue for all the counties, we have the state-wide mean net patient revenue of 5047746.68'
 ;
+
 footnote2
 'In the 10 counties listed, their annual net patient revenue is 2-8 times of the state-wide average.'
 ;
+
 footnote3
 'We can infer that there is a huge gap in healthcare facilities anual income among different areas in california.'
 ; 
+
 *
 Note: This compares the column COUNTY_CODE from SC_listing and column 
 NET_PATIENT_REV_TOTL from SC_data16.
