@@ -244,38 +244,41 @@ run;
 * combine HL_listing data and SC_listing data vertically;
 
 data HL_SC_Analytic_file;
+    length
+	    ADDRESS $32.
+	;
     set
-	HL_listing_raw_sorted(in=HL_row)
+	    HL_listing_raw_sorted(in=HL_row)
     	SC_listing_raw_sorted(in=SC_row)
     ;
     retain
-	FACILITY_NAME
-	LICENSE_NUM
-	FACILITY_LEVEL
-	ADDRESS
-	CITY
-	ZIP_CODE
-	COUNTY_CODE
-	COUNTY_NAME
-	ER_SERVICE
-	TOTAL_BEDS
-	FACILITY_STATUS_DESC
-	FACILITY_STATUS_DATE
-	LICENSE_TYPE
-	LICENSE_CATEGORY
+	    FACILITY_NAME
+	    LICENSE_NUM
+	    FACILITY_LEVEL
+	    ADDRESS
+	    CITY
+	    ZIP_CODE
+	    COUNTY_CODE
+	    COUNTY_NAME
+	    ER_SERVICE
+	    TOTAL_BEDS
+	    FACILITY_STATUS_DESC
+	    FACILITY_STATUS_DATE
+	    LICENSE_TYPE
+	    LICENSE_CATEGORY
     ;
     by
-	OSHPD_ID
+	    OSHPD_ID
     ;
     if
         HL_row=1
     then
         do;
-            data_source=HL_listing_raw_sorted;
+            data_source="HL_row";
         end;
     else
         do;
-            data_source=SC_listing_raw_sorted;
+            data_source="SC_row";
         end;
 run;
 
@@ -284,25 +287,25 @@ run;
 
 data SC16_analytic_file;
     retain
-	OSHPD_ID
-	FAC_NAME
-	FAC_CITY
-	GRO_REV_TOTL
-	REV_OPER_TOTL
-	EXP_OPER_TOTL
-	NET_FRM_OPER		
+	    OSHPD_ID
+	    FAC_NAME
+	    FAC_CITY
+	    GRO_REV_TOTL
+	    REV_OPER_TOTL
+	    EXP_OPER_TOTL
+	    NET_FRM_OPER		
     ;
     keep
-	OSHPD_ID
-	FAC_NAME
-	FAC_CITY
-	GRO_REV_TOTL
-	REV_OPER_TOTL
-	EXP_OPER_TOTL
-	NET_FRM_OPER
+	    OSHPD_ID
+	    FAC_NAME
+	    FAC_CITY
+	    GRO_REV_TOTL
+	    REV_OPER_TOTL
+	    EXP_OPER_TOTL
+	    NET_FRM_OPER
     ;
     set
-	SC_data16_raw_sorted
+	    SC_data16_raw_sorted
     ;
 run;
 
@@ -317,14 +320,12 @@ data SC_analytic_file_TT1;
         FAC_CITY
         REV_OPER_TOTL
         EXP_OPER_TOTL
-        NET_FRM_OPER
         PROFIT_DIFFERENCES_1516
     ;
     keep
         OSHPD_ID
         FAC_NAME
         FAC_CITY
-        NET_FRM_OPER
         PROFIT_DIFFERENCES_1516
     ;
     merge
@@ -332,13 +333,23 @@ data SC_analytic_file_TT1;
         SC_data16_raw_sorted(rename=(NET_FRM_OPER=PROFIT16))
     ;
     by
-	OSHPD_ID
+	    OSHPD_ID
     ;
+	if
+	    not(missing(PROFIT15))
+		and
+		not(missing(PROFIT16))
+	;
     PROFIT_DIFFERENCES_1516=
-        input(PROFIT16,best12.)
+        PROFIT16
         -
-        input(PROFIT15,best12.)
+        PROFIT15
     ;
+	if
+	    not(missing(OSHPD_ID))
+		and
+		not(missing(PROFIT_DIFFERENCES_1516))
+	;
 run;
 
 
@@ -350,14 +361,12 @@ data SC_analytic_file_TT2;
         OSHPD_ID
         FAC_NAME
         FAC_CITY
-        GRO_REV_TOTL
         Gross_Patient_Revenue_Diff_1516
     ;
     keep
         OSHPD_ID
         FAC_NAME
         FAC_CITY
-        GRO_REV_TOTL
         Gross_Patient_Revenue_Diff_1516 
     ;
     merge
@@ -365,13 +374,23 @@ data SC_analytic_file_TT2;
         SC_data16_raw_sorted(rename=(GRO_REV_TOTL=REVENUE16))
     ;
     by
-	OSHPD_ID
+	    OSHPD_ID
     ;
+	if
+	    not(missing(REVENUE15))
+		and
+		not(missing(REVENUE16))
+	;
     Gross_Patient_Revenue_Diff_1516=
-        input(REVENUE16,best12.)
+        REVENUE16
         -
-        input(REVENUE15,best12.)
+        REVENUE15
     ;
+	if
+	    not(missing(OSHPD_ID))
+		and
+		not(missing(Gross_Patient_Revenue_Diff_1516))
+	;
 run;
 
 
@@ -413,29 +432,29 @@ run;
 
 data SC_data_XY1;
     retain 	
-	OSHPD_ID
-	FAC_NAME
-	CITY
-	COUNTY_CODE
-	COUNTY_NAME
-	GRO_REV_TOTL
-	NET_PATIENT_REV_TOTL
+	    OSHPD_ID
+	    FAC_NAME
+	    CITY
+	    COUNTY_CODE
+	    COUNTY_NAME
+	    GRO_REV_TOTL
+	    NET_PATIENT_REV_TOTL
     ;
     keep
-	OSHPD_ID
-	FAC_NAME
-	CITY
-	COUNTY_CODE
-	COUNTY_NAME
-	GRO_REV_TOTL
-	NET_PATIENT_REV_TOTL
+	    OSHPD_ID
+	    FAC_NAME
+	    CITY
+	    COUNTY_CODE
+	    COUNTY_NAME
+	    GRO_REV_TOTL
+	    NET_PATIENT_REV_TOTL
     ;
     merge 
-	SC_listing_raw_sorted
-	SC_data16_raw_sorted
+	    SC_listing_raw_sorted
+	    SC_data16_raw_sorted
     ;
     by
-	OSHPD_ID
+	    OSHPD_ID
     ;
 run;
 
