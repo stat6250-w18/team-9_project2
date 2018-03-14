@@ -51,7 +51,6 @@ footnote3
 Note: This calculates the total count from the column COUNTY_NAME from SC_listing 
 and column COUNTY_NAME from HL_listing.
 
-
 Methodology: First, combine SC_listing  and HL_listing in data prep file and use
 proc Freq to summarize the frequency of each county and output table as 
 countyfreq. Then, use proc sort to create a temporary sorted table in descending 
@@ -70,6 +69,7 @@ data or a rolling average of previous years' data as a proxy.
 
 * use proc print to print out top 10 results in the frequency count in facility 
 numbers;
+
 proc print
     data=county_freq_sort(obs=10)
     ;
@@ -111,6 +111,10 @@ footnote3
 ;
 
 *
+
+Note: This compares bins in NET_PATIENT_REV_TOTL column from SC_data16 table 
+and bins in GRO_REV_TOTL column in the same table.
+
 Methodology: Use proc means to compute 5-number summaries of Gross_Patient_Rev 
 and Total_Operating_Rev. Then use proc format to create formats that bin both 
 columns with respect to the proc means output. Then use proc freq to create a 
@@ -124,6 +128,7 @@ statistical proof for a correlation test.
 Followup Steps: A more rigorous way of testing the relationship can use an 
 inferential statistical technique like linear regression.
 ;
+
 proc freq
 	data= SC_data16_raw_sorted;
 	table 
@@ -160,6 +165,7 @@ footnote3
 ; 
 
 *
+
 Note: This compares the column COUNTY_CODE from SC_listing and column 
 NET_PATIENT_REV_TOTL from SC_data16.
 
