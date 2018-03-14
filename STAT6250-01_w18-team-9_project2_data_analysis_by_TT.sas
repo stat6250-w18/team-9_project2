@@ -31,7 +31,6 @@ X "cd ""%substr(%sysget(SAS_EXECFILEPATH),1,%eval(%length(%sysget(SAS_EXECFILEPA
 *******************************************************************************;
 
 title1
-*
 'Research Question 1: What are Specialty Care Clinics experienced decrease (negative revenue) in "NET_FRM_OPERù" between 2015 and 2016?'
 ;
 
@@ -74,17 +73,19 @@ List all clinics experienced decrease (negative profit) from 15-16
 ;
 proc print 
     data=SC_analytic_file_TT1_print
-   ;
-   id
-       FAC_NAME
-       FAC_CITY
-   ;
-   var
-       PROFIT_DIFFERENCES_1516
-   ;
-   where
-        PROFIT_DIFFERENCES_1516 lt 0
     ;
+    id
+        FAC_NAME
+        FAC_CITY
+    ;
+    var
+        PROFIT_DIFFERENCES_1516
+    ;
+    where
+        PROFIT_DIFFERENCES_1516 < 0
+    ;
+    ods html
+	;
 run;
 
 title;
@@ -161,6 +162,7 @@ title1
 'Research Question 3: Is it possible to use "GRO_REV_TOTL" (revenue) to predict the decrease or loss of Net From Operation (profit)?'
 ;
 
+title2
 'Rationale: This would help identify whether revenue is associated with Net From Operation (profit) to consider for further financial aid assistant from Cal State.'
 ;
 
@@ -180,6 +182,9 @@ footnote4
 'In this case, p-value is smaller than alpha of 0.05 or 5% so revenue and profit show significant correlation.'
 ;
 
+footnote5
+'For that reason, we can conclude that GRO_REV_TOTL (revenue) can be used to predict decrease/loss from Net Fom Operation (profit).'
+;
 *
 Note: This compares the column "GRO_REV_TOTL" from SC_data to the column 
 NET_FRM_OPER from SC16_analytic_file.
@@ -198,9 +203,11 @@ Possible Follow-up Steps: A possible follow-up to this approach could use an
 inferential statistical technique like linear regression.
 ;
 
-proc univariate 
+proc univariate
+    noprint 
     data=SC16_analytic_file;
     histogram GRO_REV_TOTL;
+	histogram NET_FRM_OPER;
 run;
 
 proc freq
