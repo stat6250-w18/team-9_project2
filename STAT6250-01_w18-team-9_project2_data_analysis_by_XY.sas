@@ -11,7 +11,7 @@ Dataset Name: SC_data analytic_file and HL_SC_Analytic_file created in external
 file STAT6250-01_w18-team-9_project2_data_preparation.sas, which is assumed to 
 be in the same directory as this file.
 
-See included file for dataset properties
+See included file for dataset properties.
 ;
 
 * environmental setup;
