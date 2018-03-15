@@ -91,6 +91,9 @@ footnote2
 ;
 
 *
+Note: This calculate the mean value of the ToTal_Beds column from 
+HL_Listing table and group by the COUNTY_NAME colunm in the same table.
+
 Methodology:Using proc print to display the first 10 row of the sorted dataset 
 and use WHERE statement to limiting the range. 
 
