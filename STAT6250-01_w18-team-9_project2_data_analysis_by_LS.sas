@@ -162,7 +162,7 @@ proc means
 		range
 		max
 		min
-		maxdex=1
+		maxdec=1
 		data=SC_data_XY1
     ;
     class
