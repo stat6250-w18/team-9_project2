@@ -30,7 +30,7 @@ X "cd ""%substr(%sysget(SAS_EXECFILEPATH),1,%eval(%length(%sysget(SAS_EXECFILEPA
 *******************************************************************************;
 
 title1
-'Research Question: What are the top ten counties that have largest amount for Special Care and hospitals? (consider the two category together)'
+'Research Question: What are the top ten counties with largest amount for Special Care and hospitals? (consider the two categories together)'
 ;
 
 title2
@@ -81,7 +81,7 @@ footnote;
 
 
 title1
-'Research question: Can net patient revenue (SC_16) be used to gross total revenue for special care facilities in 2016?'
+'Research question: Can net patient revenue (SC_16) be used to predict gross total revenue for special care facilities in 2016?'
 ;
 
 title2
@@ -147,7 +147,7 @@ title;
 footnote;
 
 title1
-'Research Question: What is the top ten counties have highest special care total net patient revenue in 2016?'
+'Research Question: What is the top ten county names with highest special care total net patient revenue in 2016?'
 ;
 
 title2
